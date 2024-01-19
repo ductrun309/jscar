@@ -77,7 +77,7 @@ class Enemy {
     this.scale = 0.05;
     this.vel = vel;
     this.pos = pos;
-    this.health = 3;
+    this.health = 1;
     img.onload = () => {
       this.scale = 0.05;
       this.width = img.width * this.scale;
@@ -97,7 +97,17 @@ class Enemy {
   }
 }
 
+class Screen {
+  draw() {
+    ctx.fillStyle = "Black";
+    ctx.font = "30px Arial";
+    ctx.fillText(`Score: ${count}`, 0, 50, 100);
+  }
+}
+
 var animation;
+var count = 0;
+const screen = new Screen();
 const player = new Player();
 const bullet = [];
 const enemy = [];
@@ -106,8 +116,8 @@ let spawn_enemy = setInterval(() => {
   enemy.push(
     new Enemy({
       pos: {
-        x: Math.random() * canvas_width,
-        y: 100,
+        x: Math.random() * (canvas_width - 50) + 50,
+        y: 0,
       },
       vel: {
         x: 1,
@@ -115,7 +125,7 @@ let spawn_enemy = setInterval(() => {
       },
     })
   );
-}, 1000);
+}, 500);
 const key_press = {
   a: {
     press: false,
@@ -175,7 +185,6 @@ function check() {
       ) {
         bullet.splice(index, 1);
         ghost.health--;
-        console.log("true");
       }
     });
   });
@@ -185,24 +194,24 @@ function animate() {
   ctx.clearRect(0, 0, canvas_width, canvas_height);
   player.update();
   key_control();
+  screen.draw();
   bullet.forEach((projectile, index) => {
     if (projectile.radius + projectile.pos.y <= 0) {
       bullet.splice(index, 1);
     }
     projectile.update();
   });
+  check();
   enemy.forEach((ghost, index) => {
-    if (
-      ghost.health == 0 ||
-      ghost.pos.x >= canvas_width ||
-      ghost.pos.y >= canvas_height
-    ) {
+    if (ghost.pos.x >= canvas_width || ghost.pos.y >= canvas_height) {
       enemy.splice(index, 1);
+    }
+    if (ghost.health == 0) {
+      enemy.splice(index, 1);
+      count++;
     }
     ghost.update();
   });
-
-  check();
 }
 
 window.addEventListener("keydown", (e) => {
